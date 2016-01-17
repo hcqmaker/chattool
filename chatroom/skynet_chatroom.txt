@@ -1,2 +1,4 @@
 use skynet to write this demo 
 this is a simple chat room
+
+client --> watchdog --> agent, room --> watchdog --> client

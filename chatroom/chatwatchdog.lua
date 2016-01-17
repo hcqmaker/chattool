@@ -1,6 +1,8 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
 
+require "skynet.manager"	-- import skynet.register
+
 local CMD = {}
 local SOCKET = {}
 local gate
@@ -8,7 +10,7 @@ local agent = {}
 
 function SOCKET.open(fd, addr)
 	skynet.error("New client from : " .. addr)
-	agent[fd] = skynet.newservice("agent")
+	agent[fd] = skynet.newservice("chatagent")
 	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
 end
 
@@ -48,6 +50,10 @@ function CMD.close(fd)
 	close_agent(fd)
 end
 
+function CMD.SAY(msg)
+	print("say something:", msg);
+end
+
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
 		if cmd == "socket" then
@@ -60,5 +66,8 @@ skynet.start(function()
 		end
 	end)
 
+	
+	-- send self wathchdog to room
+	skynet.call("ROOM", "lua", "setup", {watchdog=skynet.self()});
 	gate = skynet.newservice("gate")
 end)

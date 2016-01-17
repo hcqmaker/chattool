@@ -5,10 +5,10 @@ local max_client = 64
 
 skynet.start(function()
 	print("Server start")
-	skynet.uniqueservice("protoloader")
+	skynet.uniqueservice("chatprotoloader")
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
-	skynet.newservice("simpledb")
+	skynet.newservice("chatroom")
 	local watchdog = skynet.newservice("chatwatchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,
