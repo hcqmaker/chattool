@@ -2,3 +2,16 @@ use skynet to write this demo
 this is a simple chat room
 
 client --> watchdog --> agent, room --> watchdog --> client
+
+path:
+skynet
+	`-chatroom
+	skynet
+	...
+
+run server:
+	skyent chatroom/chatconfig
+
+run client:
+	3rd/lua/lua chatroom/chatclient.lua
+
