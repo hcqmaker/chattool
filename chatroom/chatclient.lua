@@ -98,15 +98,29 @@ local function dispatch_package()
 	end
 end
 
+function split(str, delimiter)
+	if str == nil or str == '' or delimiter == nil then
+		return nil;
+	end
+	local result = {}
+	for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+		table.insert(result, match);
+	end
+	return result;
+end
+
 send_request("handshake")
-send_request("set", { what = "hello", value = "world" })
 while true do
 	dispatch_package()
-	local cmd = socket.readstdin()
-	if cmd then
+	local line = socket.readstdin()
+	if line then
+		local cmds = split(line, " ");
+		local cmd = cmds[1]
 		if cmd == "quit" then
 			send_request("quit")
-		else
+		elseif (cmd == 'login') then
+		elseif (cmd == 'login') then
+
 			--send_request("get", { what = cmd })
 			send_request("say", { what = cmd })
 		end

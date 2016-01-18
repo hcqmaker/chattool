@@ -14,30 +14,28 @@ handshake 1 {
 	}
 }
 
-get 2 {
+login 2 {
 	request {
 		what 0 : string
+		value 1 : string
+	}
+	response {
+		from 0 : string
+		result 1 : string
+	}
+}
+
+say 3 {
+	request {
+		what 0 : string
+		value 1 : string
 	}
 	response {
 		result 0 : string
 	}
 }
 
-set 3 {
-	request {
-		what 0 : string
-		value 1 : string
-	}
-}
-
 quit 4 {}
-
-say 5 {
-	request {
-		what 0 : string
-		value 1 : string
-	}
-}
 
 ]]
 
