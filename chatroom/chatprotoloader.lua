@@ -7,7 +7,6 @@ local sprotoloader = require "sprotoloader"
 local proto = require "chatproto"
 
 skynet.start(function()
-	sprotoloader.save(proto.c2s, 1)
-	sprotoloader.save(proto.s2c, 2)
+	sprotoloader.save(proto.proto, 1)
 	-- don't call skynet.exit() , because sproto.core may unload and the global slot become invalid
 end)

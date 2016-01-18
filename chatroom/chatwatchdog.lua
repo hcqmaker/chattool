@@ -66,8 +66,5 @@ skynet.start(function()
 		end
 	end)
 
-	
-	-- send self wathchdog to room
-	skynet.call("ROOM", "lua", "setup", {watchdog=skynet.self()});
 	gate = skynet.newservice("gate")
 end)

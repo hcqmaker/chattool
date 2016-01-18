@@ -1,51 +1,46 @@
 local sprotoparser = require "sprotoparser"
 
-local proto = {}
 
-proto.c2s = sprotoparser.parse [[
-.package {
-	type 0 : integer
-	session 1 : integer
+local proto = sprotoparser.parse  [[
+
+.say {
+	msg 0 : string
 }
 
-handshake 1 {
-	response {
-		msg 0  : string
-	}
+.login {
+	name 0 : string
 }
 
-login 2 {
-	request {
-		what 0 : string
-		value 1 : string
-	}
-	response {
-		from 0 : string
-		result 1 : string
-	}
+.quit {} 
+
+.handshake {
+	msg 0 : string	
 }
 
-say 3 {
-	request {
-		what 0 : string
-		value 1 : string
-	}
-	response {
-		result 0 : string
-	}
+.heartbeat {}
+
+.msg {
+	session 0 : integer
+	userId 1 : integer
+	cmd 2 : integer
+	data 3 : string
 }
 
-quit 4 {}
 
 ]]
 
-proto.s2c = sprotoparser.parse [[
-.package {
-	type 0 : integer
-	session 1 : integer
+local cmd = {
+[1] = 'say',
+[2] = 'login',
+[3] = 'quit',
+[4] = 'handshake',
+[5] = 'heartbeat',
+[6] = 'msg',
+say = 1,
+login = 2,
+quit = 3,
+handshake = 4,
+heartbeat = 5,
+msg = 6,
 }
-
-heartbeat 1 {}
-]]
-
-return proto
+return {proto = proto, cmd = cmd};

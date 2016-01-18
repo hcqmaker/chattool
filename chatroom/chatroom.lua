@@ -4,17 +4,18 @@ local user_list = {}
 local command = {}
 
 
-local WATCHDOG 
-
-function command.ENTER(name)
-	table.insert(user_list, name);
-	return true;
+function command.LOGIN(conf)
+	local agent = conf.agent;
+	local name = conf.name;
+	print("user:", name, "login ===>");
+	table.insert(user_list, {agent=agent,name=name});
+	return {value="login ok"}
 end
 
-function command.QUIT(name)
+function command.LOGOUT(agent)
 	local idx = -1;
 	for k, v in ipairs(user_list) do
-		if (v == name) then
+		if (v.agent == agent) then
 			idx = k;
 			break;
 		end
@@ -22,17 +23,30 @@ function command.QUIT(name)
 	if (idx ~= -1) then
 		table.remove(user_list, idx);
 	end
-	return true;
 end
 
-function command.SAY(name, msg)
-	print("room==>", name, msg);
-	skynet.call(WATCHDOG, "lua", "SAY", "test_say");
-	return true;
-end
 
-function command.SETUP(conf)
-	WATCHDOG = conf.watchdog;
+function command.SAY(agent, name, msg)
+	print("say==>", agent, name, msg);
+	local found = false;
+	for k, v in ipairs(user_list) do
+		if (v.agent == agent) then
+			found = true;
+			break;
+		end
+	end
+	if (not found) then
+		return nil;
+	end
+
+	local dt = name..":"..msg;
+
+	for k, v in ipairs(user_list) do
+		if (v.agent  ~= agent) then
+			skynet.send(v.agent, "lua", "sayback", dt);
+		end
+	end
+	return dt;
 end
 
 

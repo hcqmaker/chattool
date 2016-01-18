@@ -6,19 +6,36 @@ if _VERSION ~= "Lua 5.3" then
 end
 
 local socket = require "clientsocket"
-local proto = require "chatproto"
-local sproto = require "sproto"
+local chatproto = require "chatproto"
 
-local host = sproto.new(proto.s2c):host "package"
-local request = host:attach(sproto.new(proto.c2s))
+local cmdkv = chatproto.cmd;
+local proto = sproto.new(chatpro.proto);
 
-local fd = assert(socket.connect("127.0.0.1", 8888))
 
-local function send_package(fd, pack)
-	local package = string.pack(">s2", pack)
+local fd = assert(socket.connect("127.0.0.1", 8881))
+
+-- send message
+local session = 0
+local function send_msg(name, dt)
+	session = session + 1;
+	local msg = proto.pencode(name, dt);
+	local t = {session = session, userId = 0, data = msg};
+	local package = string.pack(">s2", proto.pencode(cmdkv[6], t))
 	socket.send(fd, package)
 end
 
+function split(str, delimiter)
+	if str == nil or str == '' or delimiter == nil then
+		return nil;
+	end
+	local result = {}
+	for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+		table.insert(result, match);
+	end
+	return result;
+end
+
+-- receive message
 local function unpack_package(text)
 	local size = #text
 	if size < 2 then
@@ -48,43 +65,6 @@ local function recv_package(last)
 	return unpack_package(last .. r)
 end
 
-local session = 0
-
-local function send_request(name, args)
-	session = session + 1
-	local str = request(name, args, session)
-	send_package(fd, str)
-	print("Request:", session)
-end
-
-local last = ""
-
-local function print_request(name, args)
-	print("REQUEST", name)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
-		end
-	end
-end
-
-local function print_response(session, args)
-	print("RESPONSE", session)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
-		end
-	end
-end
-
-local function print_package(t, ...)
-	if t == "REQUEST" then
-		print_request(...)
-	else
-		assert(t == "RESPONSE")
-		print_response(...)
-	end
-end
 
 local function dispatch_package()
 	while true do
@@ -94,22 +74,24 @@ local function dispatch_package()
 			break
 		end
 
-		print_package(host:dispatch(v))
+		local rt = proto.decode("msg", v);
+		local command = cmdkv[rt.cmd];
+
+		print("command:", command);
+
+		if (command == 'say') then
+		elseif (command == 'login') then
+		elseif (command == 'quit') then
+		elseif (command == 'handshake') then
+		elseif (command == 'heartbeat') then
+		end
+		print("can't find cmd:", rt.cmd);
 	end
 end
 
-function split(str, delimiter)
-	if str == nil or str == '' or delimiter == nil then
-		return nil;
-	end
-	local result = {}
-	for match in (str..delimiter):gmatch("(.-)"..delimiter) do
-		table.insert(result, match);
-	end
-	return result;
-end
 
-send_request("handshake")
+send_msg("handshake", {msg='t'});
+
 while true do
 	dispatch_package()
 	local line = socket.readstdin()
@@ -117,12 +99,11 @@ while true do
 		local cmds = split(line, " ");
 		local cmd = cmds[1]
 		if cmd == "quit" then
-			send_request("quit")
+			send_msg("quit", {});
 		elseif (cmd == 'login') then
-		elseif (cmd == 'login') then
-
-			--send_request("get", { what = cmd })
-			send_request("say", { what = cmd })
+			send_msg("login", {name=cmds[2]});
+		elseif (cmd == 'say') then
+			send_msg("say", {name=cmds[2]});
 		end
 	else
 		socket.usleep(100)
